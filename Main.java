@@ -25,7 +25,7 @@ public class Main {
             while(Server){
                 String ClientCommand = In.readLine();
 
-                if(ClientCommand.equals("newuser" ||  )){
+                if(ClientCommand.equals("newuser")){
                     Out.println("New Username: ");
                     String NewName = In.readLine();
 
