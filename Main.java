@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 public class Main {
     public static void main(String[] args) {
         boolean Server = true;
+        boolean UserLogged = false;
         HashMap<String,String> User = new HashMap<String,String>();
 
         try{
@@ -25,7 +26,7 @@ public class Main {
             while(Server){
                 String ClientCommand = In.readLine();
 
-                if(ClientCommand.equals("newuser")){
+                if(ClientCommand.equals("newuser") && !UserLogged){
                     Out.println("New Username: ");
                     String NewName = In.readLine();
 
@@ -33,6 +34,7 @@ public class Main {
                     String NewPas = In.readLine();
 
                     Out.println("UserCreated!");
+                    UserLogged = true;
                     System.out.println("UID: "+NewName+":"+NewPas);
                 }
 
