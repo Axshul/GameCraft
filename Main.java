@@ -1,4 +1,3 @@
-import java.util.Scanner;
 import java.util.HashMap;
 import java.net.Socket;
 import java.net.ServerSocket;
@@ -7,47 +6,71 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class Main {
+public class Main{
     public static void main(String[] args) {
-        boolean Server = true;
-        boolean UserLogged = false;
-        HashMap<String,String> User = new HashMap<String,String>();
+        boolean running = true;
+        boolean userLogged = false;
+        String currentUser = null;
+        HashMap<String, String> users = new HashMap<>();
 
-        try{
-            System.out.println("Listening On Port 5431");
-            ServerSocket ServerSocket = new ServerSocket(5431);
-            Socket ClientSocket = ServerSocket.accept();
-            System.out.println("Client Connected");
+        try (ServerSocket serverSocket = new ServerSocket(5431)) {
+            System.out.println("Listening on port 5431...");
+            Socket clientSocket = serverSocket.accept();
+            System.out.println("Client connected");
 
-            PrintWriter Out = new PrintWriter(ClientSocket.getOutputStream(),true);
-            BufferedReader In = new BufferedReader(new InputStreamReader(ClientSocket.getInputStream()));
+            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-            Out.println("Connected To GameCraft");
-            while(Server){
-                String ClientCommand = In.readLine();
+            out.println("Connected To GameCraft");
 
-                if(ClientCommand.equals("newuser") && !UserLogged){
-                    Out.println("New Username: ");
-                    String NewName = In.readLine();
+            while (running) {
+                String command = in.readLine();
+                if (command == null) break;
 
-                    Out.println("New Password: ");
-                    String NewPas = In.readLine();
+                switch (command.toLowerCase()) {
+                    case "newuser":
+                        if (!userLogged) {
+                            out.println("New Username: ");
+                            String newName = in.readLine();
 
-                    Out.println("UserCreated!");
-                    UserLogged = true;
-                    System.out.println("UID: "+NewName+":"+NewPas);
-                }
+                            out.println("New Password: ");
+                            String newPass = in.readLine();
 
-                if(ClientCommand.equals("exit")){
-                    Out.println("Bye Bye!");
-                    Server = false;
-                    ServerSocket.close();
+                            users.put(newName, newPass);
+                            userLogged = true;
+                            currentUser = newName;
+                            out.println("UserCreated!");
+                            System.out.println("UID: " + newName + ":" + newPass);
+                        } else {
+                            out.println("Already logged in.");
+                        }
+                        break;
+
+                    case "ls":
+                        out.println("file1.txt file2.txt project.java");
+                        break;
+
+                    case "whoami":
+                        if (userLogged && currentUser != null) {
+                            out.println("You are logged in as " + currentUser);
+                        } else {
+                            out.println("Guest (not logged in)");
+                        }
+                        break;
+
+                    case "exit":
+                        out.println("Bye Bye!");
+                        running = false;
+                        break;
+
+                    default:
+                        out.println("Unknown command: " + command);
+                        break;
                 }
             }
 
-            ServerSocket.close();
-
-        } catch(IOException err){
+            System.out.println("Server shutting down...");
+        } catch (IOException err) {
             err.printStackTrace();
         }
     }
